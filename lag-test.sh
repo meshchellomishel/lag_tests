@@ -2,6 +2,11 @@
 
 while [ $# -gt 0 ]; do
   case $1 in
+    -l|--lag)
+      LAGTEST=true
+      OPEXIST=true
+      shift
+      ;;
     -e|--enslave)
       ENSLAVETEST=true
       OPEXIST=true
@@ -43,20 +48,29 @@ if [ "$OPEXIST" != "true" ]; then
   exit 0
 fi
 
+if [ "$ENSLAVETEST" = "true" ]; then
+  echo "Creating lag$1"
+  create_lag 1
+fi
+
 PORTS="fe1 fe2 fe3 fe4 fe5 fe6 fe7 fe8 fe9 fe10 fe11 fe12 fe13 fe14 fe15 fe16 fe17 fe18"
 # fe10 fe11 fe12 fe13 fe14 fe15 fe16 fe17 fe18 fe19 fe20 fe21 fe22 fe23 fe24
 
 c=1
 for i in $PORTS
 do
-	if [ "$ENSLAVETEST" = "true" ]; then
+	if [ "$LAGTEST" = "true" ]; then
+  	echo "Enslaving $i to lag1"
+		enslave_port "$i" 1
+  elif [ "$ENSLAVETEST" = "true" ]; then
   	echo "Enslaving $i"
-		create_lag "$c"
-		enslave_port "$i" "$c"
+		delete_lag "$c"
+		enslave_port 1
+	  c=$(($c+1))
 	elif [ "$RELEASE" = "true" ]; then
   	echo "Releasing $i"
 		delete_lag "$c"
 		release_port "$i"
+	  c=$(($c+1))
 	fi
-	c=$(($c+1))
 done
