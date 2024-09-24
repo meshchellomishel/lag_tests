@@ -64,7 +64,6 @@ do
 		enslave_port "$i" 1
   elif [ "$ENSLAVETEST" = "true" ]; then
   	echo "Enslaving $i"
-		delete_lag "$c"
 		enslave_port 1
 	  c=$(($c+1))
 	elif [ "$RELEASE" = "true" ]; then
